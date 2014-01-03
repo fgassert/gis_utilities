@@ -44,7 +44,6 @@ sys.setdefaultencoding( "latin-1" )
 # Temporary/intermediate geoprocessing files
 TMPTABLE = "in_memory/tmptable"
 TMPINTERSECT = "in_memory/tmpintersect"
-TMPPRJ = "tmpprj"
 TMPSELECT = "tmpselect"
 TMPZONES = "in_memory/tmpzones"
 TMPDOWNSAMPLE = "tmpds_"
@@ -168,7 +167,6 @@ def spatial_weighted_stats(working_directory, scratch_gdb, input_polys, input_fi
     try:
         ap.Delete_management(TMPTABLE)
         ap.Delete_management(TMPINTERSECT)
-        ap.Delete_management(TMPPRJ)
         ap.Delete_management(TMPZONES)
         if downsample is not None:
             for r in weight_rasters:
