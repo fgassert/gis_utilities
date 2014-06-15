@@ -40,29 +40,41 @@ def areagrid(outraster, c = 0.083333001, r = 6371007.2, minx = -180, miny = -90,
         outraster = path to output raster file
         c = cellsize in decimal degrees
         r = radius of earth in desired units (e.g. 6371007.2m for sq. meters)
+        minx, miny = the south west coordinate of the raster in degrees
+        w, h = the width and height of the raster in degrees
         
     Returns:
+        None
     """
     
+    # make a vector of ones [1,1,1, ... 1] of length equal to the number of cells from west to east.
     X = np.ones(round(w/c))
+    # make a vector counting from 0 to the number of cells from south to north. e.g. [0,1,2,...,179] for 1 deg cells.
     Y = np.arange(round(h/c))
     
-    radn = (Y*c + miny)*np.pi/180.0
+    # multiply all the numbers in the Y vector by the cell size, 
+    # so it extends from 0 to <180 (if the cell size is different than 1 deg)
+    # then add the southernmost coordinate (-90deg). This makes a vector of -90 to +90 degrees North
+    degN = Y*c + miny
+    # convert degrees vector to radians
+    radN = degn*np.pi/180.0
+    # convert the cell size to radians
     radc = c * np.pi/180.0
     
-    print radn
-    print radc
+    # calculate the area of the cell
+    # there's some implicit geometry that's been done here already'
+    # but basically it averages the width of the top of a cell and the bottom of a cell
+    # and mutiplies it by the height of the cell (which is constant no matter how far or south north you are)
+    # then by the square of the radius
+    # since the angles are in radians it works out area correctly
+    # you end up with a vector of cell area from south to north
+    A = (np.sin(radN+radc/2)-np.sin(radN-radc/2)) * radc * r**2
     
-    A = (np.sin(radn+radc/2)-np.sin(radn-radc/2)) * radc * r**2
-    
-    print A
-    print A[len(A)//2]
-    
+    # the outer product of any vector and a vector of ones just duplicates the first vector into columns in a matrix
+    # basically we just copy the latitude vector across from east to west
     M = np.outer(A,X)
-    print M
-    print M.shape
-
-
+    
+    # save the matrix as a raster
     r = ap.NumPyArrayToRaster(M,arcpy.Point(minx,miny),c,c)
     r.save(outraster)
     
