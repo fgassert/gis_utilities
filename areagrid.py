@@ -3,7 +3,7 @@ areagrid.py
 
 Generates a global grid in geograpic coordinates with the area of each gridcell as the value of the cell
 
-Requires: ArcGIS 10.1+, Numpy
+Requires: Rasterio, Numpy, GDAL
 
 The MIT License (MIT)
 
@@ -29,7 +29,10 @@ THE SOFTWARE.
 """
 
 import numpy as np
-import arcpy as ap
+import sys
+import rasterio
+from rasterio import Affine
+
 
 def areagrid(outraster, c = 0.083333001, r = 6371007.2, minx = -180, miny = -90, w = 360, h = 180):
     """
@@ -46,7 +49,9 @@ def areagrid(outraster, c = 0.083333001, r = 6371007.2, minx = -180, miny = -90,
     Returns:
         None
     """
-    
+    c = float(c)
+    r = float(r)
+
     # make a vector of ones [1,1,1, ... 1] of length equal to the number of cells from west to east.
     X = np.ones(round(w/c))
     # make a vector counting from 0 to the number of cells from south to north. e.g. [0,1,2,...,179] for 1 deg cells.
@@ -57,7 +62,7 @@ def areagrid(outraster, c = 0.083333001, r = 6371007.2, minx = -180, miny = -90,
     # then add the southernmost coordinate (-90deg). This makes a vector of -90 to +90 degrees North
     degN = Y*c + miny
     # convert degrees vector to radians
-    radN = degn*np.pi/180.0
+    radN = degN*np.pi/180.0
     # convert the cell size to radians
     radc = c * np.pi/180.0
     
@@ -75,6 +80,16 @@ def areagrid(outraster, c = 0.083333001, r = 6371007.2, minx = -180, miny = -90,
     M = np.outer(A,X)
     
     # save the matrix as a raster
-    r = ap.NumPyArrayToRaster(M,arcpy.Point(minx,miny),c,c)
-    r.save(outraster)
+    with rasterio.open(outraster,'w',
+                       'GTiff',
+                       width=w,
+                       height=h,
+                       dtype=M.dtype,
+                       crs={'init': 'EPSG:4326'},
+                       transform=Affine.translation(-w*c/2, h*c/2) * Affine.scale(c, -c),
+                       count=1) as dst:
+        dst.write_band(1,M)
+
     
+if __name__ == "__main__":
+    areagrid(*sys.argv[1:])
