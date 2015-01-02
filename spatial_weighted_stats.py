@@ -398,12 +398,15 @@ def weighted_percentiles(values, weights, ps):
 
 if __name__ == '__main__':
     
-    
+    """
     # ArcGIS scratch workspace
     working_directory = "C:/Users/francis.gassert/Documents/ArcGIS/GISSync/"
     scratch_gdb = "scratch.gdb"
     
-       # Original polygon data
+    os.chdir(working_directory)
+    ap.env.workspace = scratch_gdb
+    
+    # Original polygon data
     input_polys = "global_maps/aqueduct_global_dl_20130123.gdb/global_master_20130123"
     # Attribute fields to aggregate (must be numeric)        
     input_fields = ["BWS_s","WSV_s","SV_s","HFO_s","DRO_s","DEFAULT"]
@@ -427,6 +430,7 @@ if __name__ == '__main__':
     # Statistics to calculate
     stats = {"mean":1,"v":0,"sd":1,"mode":0,"hist":0,"min":0,"max":0,"sum":0,"nan":1,"hist":[0,1,2,3,4,5],"p":[0.5]}
 
-    spatial_weighted_stats(working_directory, scratch_gdb, input_polys, input_fields,
+    spatial_weighted_stats(input_polys, input_fields,
                         weight_rasters, out_file, output_polys,
                         stats, downsample, null_value)
+    """
