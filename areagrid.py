@@ -79,14 +79,17 @@ def areagrid(outraster, c = 0.083333001, r = 6371007.2, minx = -180, miny = -90,
     # basically we just copy the latitude vector across from east to west
     M = np.outer(A,X)
     
+    cols = round(w/c)
+    rows = round(h/c)
+    
     # save the matrix as a raster
     with rasterio.open(outraster,'w',
                        'GTiff',
-                       width=w,
-                       height=h,
+                       width=cols,
+                       height=rows,
                        dtype=M.dtype,
                        crs={'init': 'EPSG:4326'},
-                       transform=Affine.translation(-w*c/2, h*c/2) * Affine.scale(c, -c),
+                       transform=Affine.translation(-cols*c/2, rows*c/2) * Affine.scale(c, -c),
                        count=1) as dst:
         dst.write_band(1,M)
 
